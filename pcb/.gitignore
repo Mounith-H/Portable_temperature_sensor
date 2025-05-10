@@ -1,0 +1,7 @@
+# Ignore specific files
+pcb_missing3Dmodels.txt
+pcb_log_missing3Dmodels.txt
+
+# Ignore bom directory
+bom/
+pcb-backups/
