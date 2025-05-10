@@ -1,97 +1,134 @@
-# Portable Temperature Sensor Project
+# Portable Temperature Sensor - Implementation
 
-This project uses a NodeMCU ESP8266 with MAX6675 thermocouple to create a portable temperature sensor with wireless connectivity.
+This folder contains the implementation code for the Portable Temperature Sensor project.
 
-## May 2025 Update
-
-Important changes:
-- Removed all OLED display functionality (will be implemented separately)
-- Removed GyverOLED library dependency
-- Fixed String comparison issues (changed == to .equals())
-- Simplified project structure
-- Removed unneeded display files
-
-## Hardware Requirements
-
-- NodeMCU ESP8266
-- MAX6675 Thermocouple Module
-- Buzzer
-- Wires/Breadboard for connections
-
-## Pin Connections
+## Project Structure
 
 ```
-Temperature Sensor (MAX6675):
-- SCK → GPIO14 (D5 on NodeMCU)
-- CS  → GPIO16 (D0 on NodeMCU)
-- SO  → GPIO12 (D6 on NodeMCU)
-- VCC → 3.3V
-- GND → GND
-
-Buzzer:
-- Buzzer+ → GPIO0  (D3 on NodeMCU)
-- Buzzer- → GND
-
-Interrupt Output:
-- Signal → GPIO2  (D4 on NodeMCU)
+Portable_temperature_sensor/
+├── platformio.ini        # PlatformIO configuration file
+├── include/              # Header files
+├── lib/                  # Project-specific libraries
+├── src/                  # Source code
+│   ├── main.cpp          # Main application code
+│   ├── NetworkManager.h  # WiFi connection management
+│   ├── display_helper.h  # Display helper functions (not currently used)
+│   └── display_helper.cpp# Display implementation (not currently used)
+└── test/                 # Test files
 ```
 
-## Software Setup
+## Development Environment
 
-### PlatformIO
+### PlatformIO Configuration
 
-1. Open the project in PlatformIO
-2. All required libraries are specified in platformio.ini
-3. Build and upload to NodeMCU
+This project uses PlatformIO for dependency management and deployment. The `platformio.ini` file is configured with:
 
-### Arduino IDE
+```ini
+[env:nodemcuv2]
+platform = espressif8266
+board = nodemcuv2
+framework = arduino
+monitor_speed = 115200
+lib_deps = 
+	knolleary/PubSubClient@^2.8
+	plerup/EspSoftwareSerial@^8.2.0
+	adafruit/MAX6675 library@^1.1.2
+	gyverlibs/GyverOLED@^1.6.4
+```
 
-1. Make sure you have the ESP8266 board manager URLs set up
-2. Install the following libraries:
-   - GyverOLED
-   - PubSubClient
-   - EspSoftwareSerial
-   - Adafruit MAX6675
-3. Open main.cpp as your Arduino sketch
-4. Select NodeMCU 1.0 ESP-12E Module as the board type
-5. Build and upload
+> **Note:** The GyverOLED library is still included but display functionality has been removed in the latest version. This dependency will be removed in future updates.
 
-## Building and Uploading
+## Implementation Details
+
+### Hardware Configuration
+
+The sensor hardware is configured in `main.cpp` with the following pin assignments:
+
+```cpp
+// MAX6675 thermocouple interface pins
+const int thermoDO = 12;   // Data out (SO/MISO)
+const int thermoCS = 16;   // Chip select
+const int thermoCLK = 14;  // Clock signal
+
+// Output pins
+const int buzzerPin = 0;     // Alarm buzzer
+const int interruptPin = 2;  // External trigger signal
+
+// Software serial port
+const int SOFT_RX = 13;  // GPIO13 (D7)
+const int SOFT_TX = 15;  // GPIO15 (D8)
+```
+
+### Network Connectivity
+
+WiFi connection is managed through the `NetworkManager` class in `src/NetworkManager.h`, which provides:
+
+- Automatic reconnection handling
+- Connection state management
+- Status reporting
+
+### MQTT Integration
+
+Temperature data is published to MQTT topics, with the following features:
+- Automatic reconnection to MQTT broker
+- Configurable publishing interval
+- JSON-formatted messages for easier parsing
+
+## Building and Running
 
 ### Using PlatformIO
 
-```
-cd Portable_temperature_sensor
-platformio run -t upload
-```
+1. Open this folder in VSCode with PlatformIO extension
+2. Build the project:
+   ```
+   platformio run
+   ```
+3. Upload to NodeMCU:
+   ```
+   platformio run --target upload
+   ```
+4. Monitor serial output:
+   ```
+   platformio device monitor
+   ```
 
 ### Using Arduino IDE
 
-1. Rename main.cpp to Portable_temperature_sensor.ino
-2. Move all files into a Portable_temperature_sensor folder
-3. Open the .ino file in Arduino IDE
-4. Click Upload
+1. Rename `main.cpp` to `Portable_temperature_sensor.ino`
+2. Install required libraries through the Arduino Library Manager
+3. Set board to "NodeMCU 1.0 (ESP-12E Module)"
+4. Upload sketch
 
-## Troubleshooting
+## Configuration
 
-### Display not working
-- Check the I2C connections
-- Make sure SDA is connected to GPIO4 and SCL to GPIO5
-- Verify 3.3V and GND connections
+To configure the device, edit the following parameters in `src/main.cpp`:
 
-### Temperature readings incorrect
-- Check MAX6675 connections
-- Make sure the thermocouple is properly attached to MAX6675
-- Verify power connections
+```cpp
+// WiFi settings
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
 
-### WiFi/MQTT not connecting
-- Check the WiFi and MQTT credentials in the code
-- Make sure MQTT server is reachable
-- Check for proper antenna connection on NodeMCU
+// MQTT settings
+const char* mqtt_server = "YOUR_MQTT_SERVER";
+const int mqtt_port = 1883;
 
-## Code Structure
+// Temperature thresholds
+const float tempThreshold = 80.0;  // Temperature alarm threshold in °C
+```
 
-- main.cpp: Main program file
-- NetworkManager.h: WiFi connection management
+## Known Issues
 
-Note: Display-related files (display_helper.cpp/h, display_test.h) are still in the project directory but are no longer used.
+1. **OLED Display**: Currently disabled but still referenced in code
+2. After power loss, device sometimes requires manual reset
+3. Occasional MQTT connection timeouts with certain broker configurations
+
+## Next Steps
+
+- [ ] Remove OLED display dependencies completely
+- [ ] Add over-the-air (OTA) update support
+- [ ] Implement deep sleep for battery power optimization
+- [ ] Add persistent configuration via EEPROM
+
+---
+
+For full project documentation, including hardware details and usage instructions, see the [main README](../README.md) in the parent directory.

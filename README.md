@@ -1,7 +1,7 @@
 # Portable Temperature Sensor
 
 <div align="center">
-  <img src="images/Connections_Table.png" alt="Pin Connections Table" width="600">
+  <img src="images/board.png" alt="Pin Connections Table" width="600">
 </div>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

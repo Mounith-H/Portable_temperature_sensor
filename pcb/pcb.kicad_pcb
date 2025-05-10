@@ -2403,15 +2403,15 @@
 			(uuid "752f6461-10a7-4f07-b56c-526ff9588654")
 		)
 		(embedded_fonts no)
-		(model "${KICAD9_3DMODEL_DIR}/TerminalBlock_MetzConnect.3dshapes/TerminalBlock_MetzConnect_Type175_RT02702HBLC_1x02_P7.50mm_Horizontal.wrl"
+		(model "C:/Users/mouni/Downloads/ABDM/3d_models/DG365-7.5-02P-12-00AH.STEP"
 			(offset
-				(xyz 0 0 0)
+				(xyz 11.25 -5 0)
 			)
 			(scale
 				(xyz 1 1 1)
 			)
 			(rotate
-				(xyz 0 0 0)
+				(xyz -90 -0 -180)
 			)
 		)
 	)
