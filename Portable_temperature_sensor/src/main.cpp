@@ -78,7 +78,7 @@ unsigned long mainLastDisplayUpdateInterval = 0;
 // WiFi and MQTT state tracking
 bool mqttWasConnected = false;
 unsigned long lastDisplayUpdate = 0;
-const unsigned long displayUpdateInterval = 1000; // Update network status on display every 1 seconds
+const unsigned long displayUpdateInterval = 500; // Update network status on display every 1 seconds
 bool updateDisplayStatus = false;
 
 // Time configuration
@@ -217,7 +217,7 @@ void updateNetworkDisplay() {
       // MQTT disconnected but WiFi connected - blink
       if (!updateDisplayStatus) display.dot(127, 4, OLED_BLACK); 
       else display.dot(127, 4, OLED_WHITE); 
-    }
+    } else if ((state == CONN_DISCONNECTED) || (state == CONN_CONNECTION_FAILED)) display.dot(127, 4, OLED_BLACK);
 
     // WiFi status indicator
     if (state == CONN_CONNECTED) {
@@ -226,7 +226,7 @@ void updateNetworkDisplay() {
       // Blinking WiFi indicator 
       if (!updateDisplayStatus) display.dot(127, 8, OLED_BLACK); 
       else display.dot(127, 8, OLED_WHITE); 
-    }
+    } else if ((state == CONN_DISCONNECTED) || (state == CONN_CONNECTION_FAILED)) display.dot(127, 8, OLED_BLACK);
 
     // Use partial update to only refresh the status indicator area
     display.update(127, 4, 127, 8);  // Update only the status indicator region
@@ -536,6 +536,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
       }
     }
   }
+  otherUpdate = true;
 }
 
 //TODO: create a animated splash screen, frames stored in splashScreen.h

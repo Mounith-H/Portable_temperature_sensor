@@ -104,6 +104,10 @@ The project includes a custom PCB design created with KiCad. The design files ar
 - **MQTT connection issues:** Confirm server address and port settings
 - **Erratic readings:** Check for interference with thermocouple wires
 
+## TODO
+- [ ] Implement splash screen at startup on OLED
+- [ ] Convert to FreeRTOS
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

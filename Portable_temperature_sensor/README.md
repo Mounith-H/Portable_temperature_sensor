@@ -122,13 +122,6 @@ const float tempThreshold = 80.0;  // Temperature alarm threshold in °C
 2. After power loss, device sometimes requires manual reset
 3. Occasional MQTT connection timeouts with certain broker configurations
 
-## Next Steps
-
-- [ ] Remove OLED display dependencies completely
-- [ ] Add over-the-air (OTA) update support
-- [ ] Implement deep sleep for battery power optimization
-- [ ] Add persistent configuration via EEPROM
-
 ---
 
 For full project documentation, including hardware details and usage instructions, see the [main README](../README.md) in the parent directory.
