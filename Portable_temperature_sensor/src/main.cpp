@@ -7,6 +7,7 @@
 #include <GyverOLED.h>
 #include "NetworkManager.h"
 #include "display_helper.h"
+#include "splashScreen.h"
 
 /*
 HARDWARE CONNECTIONS:
@@ -127,9 +128,9 @@ void setup() {
   
   noTone(buzzerPin);              // Initialize buzzer in silent state
   // MAX6675 automatically initializes when the object is created
-
   // I2C init for OLED
   Wire.begin(4, 5);
+  Wire.setClock(400000);  // Set I2C clock speed to 400kHz (fast mode)
   display.init();                 // Initialize the display
   display.clear();                // Clear the display buffer - necessary to start with a clean black background
   display.setScale(1);            // Set text size scaling to 1 (equivalent to setTextSize)
@@ -137,7 +138,7 @@ void setup() {
   display.invertText(false);      // Ensure text isn't inverted (text is white on black background)
   display.textMode(BUF_REPLACE);  // Ensure text writes in replace mode (not overlaid)
 
-  //logodisplay();  // Display logo on OLED
+  logodisplay();  // Display animated logo on OLED
 
   // Initialize network manager (non-blocking)
   networkManager.begin();
@@ -539,14 +540,55 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   otherUpdate = true;
 }
 
-//TODO: create a animated splash screen, frames stored in splashScreen.h
+// Animated splash screen implementation using frames stored in splashScreen.h
 void logodisplay() {
-  // Display logo or any other graphics here
-  // This is a placeholder for a more sophisticated splash screen
-  // Future implementation should load frames from splashScreen.h
-  // and display them in sequence for an animated effect
+    // Array of logo frames
+    const unsigned char* frames[] = {
+        logoFrames00, logoFrames01, logoFrames02, logoFrames03, 
+        logoFrames04, logoFrames05, logoFrames06, logoFrames07,
+        logoFrames08, logoFrames09, logoFrames10, logoFrames11,
+        logoFrames12, logoFrames13, logoFrames14, logoFrames15,
+        logoFrames16, logoFrames17, logoFrames18, logoFrames19,
+        logoFrames20, logoFrames21, logoFrames22, logoFrames23,
+        logoFrames24, logoFrames25, logoFrames26, logoFrames27,
+        logoFrames28, logoFrames29, logoFrames30, logoFrames31,
+        logoFrames32, logoFrames33, logoFrames34, logoFrames35,
+        logoFrames36, logoFrames37, logoFrames38, logoFrames39,
+        logoFrames40, logoFrames41, logoFrames42, logoFrames43,
+        logoFrames44, logoFrames45, logoFrames46, logoFrames47,
+        logoFrames48, logoFrames49, logoFrames50, logoFrames51,
+        logoFrames52, logoFrames53, logoFrames54, logoFrames55,
+        logoFrames56, logoFrames57, logoFrames58, logoFrames59,
+        logoFrames60
+    };
+    
+    const int totalFrames = sizeof(frames) / sizeof(frames[0]);
+    const int frameDelay = 16; // Delay between frames in milliseconds
+    
+  // Play startup sound (if buzzer is enabled)
+  if (buzzerEnabled) {
+    // Play short welcome tone
+    tone(buzzerPin, 1000, 50); 
+    delay(100);
+    tone(buzzerPin, 1500, 50);
+  }
+  
+  // Display each frame of the animation
+  for(int i = 0; i < totalFrames; i++) {
+      display.clear();                    // Clear the display buffer
+      display.drawBitmap(0, 0, frames[i], 128, 32, OLED_WHITE); // Draw the current frame
+      display.update();                   // Update the display
+      delay(frameDelay);   
+    
+    // Optional: Play a beep on certain frames for audio feedback
+    if (buzzerEnabled && i == totalFrames - 1) {
+      // Hold the final frame briefly before continuing
+      delay(1000);
+      tone(buzzerPin, 2000, 50);  // Final frame beep
+    }
+  }
+  
+  // Clear display before moving to the next screen
   display.clear();
-  display.setCursor(0, 0);
-  display.print("Logo Display");
   display.update();
 }
