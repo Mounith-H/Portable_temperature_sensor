@@ -105,7 +105,6 @@ The project includes a custom PCB design created with KiCad. The design files ar
 - **Erratic readings:** Check for interference with thermocouple wires
 
 ## TODO
-- [ ] Implement splash screen at startup on OLED
 - [ ] Convert to FreeRTOS
 
 ## Contributing

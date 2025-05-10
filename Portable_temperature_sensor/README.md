@@ -118,9 +118,7 @@ const float tempThreshold = 80.0;  // Temperature alarm threshold in °C
 
 ## Known Issues
 
-1. **OLED Display**: Currently disabled but still referenced in code
-2. After power loss, device sometimes requires manual reset
-3. Occasional MQTT connection timeouts with certain broker configurations
+1. After power loss, device requires manual configuration
 
 ---
 
