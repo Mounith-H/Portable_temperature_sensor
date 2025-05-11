@@ -76,6 +76,13 @@ GyverOLED<SSD1306_128x32, OLED_BUFFER> display(0x3C);
 unsigned long mainDisplayUpdateInterval = 1000; // Update display every 1 second
 unsigned long mainLastDisplayUpdateInterval = 0;
 
+// Battery voltage monitoring 
+float batteryVoltage = 0.0; // Battery voltage in volts
+int batteryPercentage = 0.0; // Battery percentage (0-100%)
+unsigned long lastBatteryUpdate = 0;
+const unsigned long batteryUpdateInterval = 1000; // Update battery status every 1 seconds
+bool batteryIndicatorToggle = false; // Flag to toggle battery indicator on display
+
 // WiFi and MQTT state tracking
 bool mqttWasConnected = false;
 unsigned long lastDisplayUpdate = 0;
@@ -114,6 +121,7 @@ void updateNetworkDisplay(); // Update network status on display
 void logodisplay(); // Display logo on OLED
 void displayUpdate(); // Update display with temperature and settings
 void serialHandler(); // Handle incoming serial data
+void batteryMonitor(); // Monitor battery voltage
 
 void setup() {  
   // Initialize both serial ports
@@ -202,36 +210,34 @@ void updateNetworkDisplay() {
   lastDisplayUpdate = millis();
   updateDisplayStatus = !(updateDisplayStatus);  // Toggle blink state
 
-  // Only update status indicators, not full display
-  if (millis() - lastSendTime > sendInterval / 4) {
-    ConnectionState state = networkManager.getState();
-    bool mqttConnected = mqttClient.connected();
-    
-    // Make sure we're not overlapping with other display operations
-    display.textMode(BUF_REPLACE);  // Ensure text writes in replace mode (not overlaid)
+  ConnectionState state = networkManager.getState();
+  bool mqttConnected = mqttClient.connected();
+  
+  // Make sure we're not overlapping with other display operations
+  display.textMode(BUF_REPLACE);  // Ensure text writes in replace mode (not overlaid)
 
-    // Draw the status indicators one by one
-    // MQTT status indicator
-    if (mqttConnected) {
-      display.dot(127, 4, OLED_WHITE);  // MQTT dot
-    } else if (state == CONN_CONNECTED) {
-      // MQTT disconnected but WiFi connected - blink
-      if (!updateDisplayStatus) display.dot(127, 4, OLED_BLACK); 
-      else display.dot(127, 4, OLED_WHITE); 
-    } else if ((state == CONN_DISCONNECTED) || (state == CONN_CONNECTION_FAILED)) display.dot(127, 4, OLED_BLACK);
+  // Draw the status indicators one by one
+  // MQTT status indicator
+  if (mqttConnected) {
+    display.dot(127, 4, OLED_WHITE);  // MQTT dot
+  } else if (state == CONN_CONNECTED) {
+    // MQTT disconnected but WiFi connected - blink
+    if (!updateDisplayStatus) display.dot(127, 4, OLED_BLACK); 
+    else display.dot(127, 4, OLED_WHITE); 
+  } else if ((state == CONN_DISCONNECTED) || (state == CONN_CONNECTION_FAILED)) display.dot(127, 4, OLED_BLACK);
 
-    // WiFi status indicator
-    if (state == CONN_CONNECTED) {
-      display.dot(127, 8, OLED_WHITE);  // WiFi dot
-    } else if (state == CONN_CONNECTING) {
-      // Blinking WiFi indicator 
-      if (!updateDisplayStatus) display.dot(127, 8, OLED_BLACK); 
-      else display.dot(127, 8, OLED_WHITE); 
-    } else if ((state == CONN_DISCONNECTED) || (state == CONN_CONNECTION_FAILED)) display.dot(127, 8, OLED_BLACK);
+  // WiFi status indicator
+  if (state == CONN_CONNECTED) {
+    display.dot(127, 8, OLED_WHITE);  // WiFi dot
+  } else if (state == CONN_CONNECTING) {
+    // Blinking WiFi indicator 
+    if (!updateDisplayStatus) display.dot(127, 8, OLED_BLACK); 
+    else display.dot(127, 8, OLED_WHITE); 
+  } else if ((state == CONN_DISCONNECTED) || (state == CONN_CONNECTION_FAILED)) display.dot(127, 8, OLED_BLACK);
 
-    // Use partial update to only refresh the status indicator area
-    display.update(127, 4, 127, 8);  // Update only the status indicator region
-  }
+  // Use partial update to only refresh the status indicator area
+  display.update(127, 4, 127, 8);  // Update only the status indicator region
+  
 }
 
 // Non-blocking MQTT reconnect helper
@@ -292,6 +298,7 @@ void loop() {
   networkManager.update();    // Update network state (non-blocking)
   updateNetworkDisplay();     // Update network status on display (non-blocking)
   serialHandler();            // Handle incoming serial data (non-blocking)
+  batteryMonitor();           // Monitor battery voltage (non-blocking)
   // Check if WiFi just connected and print status
   if (networkManager.justConnected()) {
     Serial.println("\n=========================");
@@ -538,6 +545,112 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     }
   }
   otherUpdate = true;
+}
+
+// Battery monitoring function for Wemos D1 Mini with battery shield
+void batteryMonitor() {
+  // The Wemos D1 Mini battery shield connects the battery to the A0 pin through a voltage divider
+  // The A0 pin on ESP8266 has a range of 0-1.0V, and the voltage divider scales it appropriately
+  
+  // Return if it's not time for the next status update
+  if (millis() - lastBatteryUpdate < batteryUpdateInterval) {
+   return;  // Not time to update yet
+  }
+
+  lastBatteryUpdate = millis();
+  // Constants for battery voltage calculation
+  const float maxBatteryVoltage = 4.2;    // Fully charged LiPo (adjust if using different battery)
+  const float minBatteryVoltage = 3.0;    // Minimum safe LiPo voltage (adjust if needed)
+  const float batteryRange = maxBatteryVoltage - minBatteryVoltage;
+  
+  // Constants for Wemos D1 Mini with battery shield
+  const float adcMax = 1023.0;            // 10-bit ADC (0-1023)
+  // The Wemos battery shield has a 100K/220K voltage divider, adding 120k at A0 giving a ratio of 340/100
+  const float voltageRatio = 4.4;         // Ratio of the voltage divider on the battery shield
+  const float offsetVoltage = 0.17;               // Offset for calibration (if needed)
+  
+  // Take multiple readings and average for stability
+  int rawValue = 0;
+  const int numReadings = 5;
+  
+  for (int i = 0; i < numReadings; i++) {
+    rawValue += analogRead(A0);
+    delay(2); // Short delay between readings
+  }
+  
+  rawValue /= numReadings;
+  
+  // Convert ADC reading to voltage
+  // ESP8266 ADC input range is 0-1.0V
+  float voltage = ((rawValue / adcMax) * voltageRatio) - offsetVoltage;
+  
+  // Calculate battery percentage
+  int percentage = ((voltage - minBatteryVoltage) / batteryRange) * 100;
+  
+  // Constrain percentage between 0-100%
+  percentage = constrain(percentage, 0.0, 100.0);
+
+  batteryVoltage = voltage;  // Store battery voltage for display
+  batteryPercentage = percentage;  // Store battery percentage for display
+  
+  // Report battery data via MQTT if connected
+  if (networkManager.isConnected() && mqttClient.connected()) {
+    char battVoltage[8];
+    char battPercent[8];
+    dtostrf(voltage, 1, 2, battVoltage);
+    dtostrf(percentage, 1, 0, battPercent);
+    
+    mqttClient.publish("sensor/battery/voltage", battVoltage);
+    mqttClient.publish("sensor/battery/percentage", battPercent);
+  }
+
+
+  switch (batteryPercentage) {
+  case 10 ... 25:
+    // Low battery warning
+    display.dot(127, 19, OLED_BLACK);
+    display.dot(127, 23, OLED_BLACK);
+    display.dot(127, 27, OLED_BLACK);
+    display.dot(127, 31, OLED_WHITE);
+    display.update(127, 19, 127, 31); // Update only the battery indicator area
+    break;
+
+  case 26 ... 50:
+    // Medium battery warning
+    display.dot(127, 19, OLED_BLACK);
+    display.dot(127, 23, OLED_BLACK);
+    display.dot(127, 27, OLED_WHITE);
+    display.dot(127, 31, OLED_WHITE);
+    display.update(127, 19, 127, 31); // Update only the battery indicator area
+    break;
+
+  case 51 ... 75:
+    // High battery warning
+    display.dot(127, 19, OLED_BLACK);
+    display.dot(127, 23, OLED_WHITE);
+    display.dot(127, 27, OLED_WHITE);
+    display.dot(127, 31, OLED_WHITE);
+    display.update(127, 19, 127, 31); // Update only the battery indicator area
+    break;  
+  
+  case 76 ... 100:
+    // Full battery warning
+    display.dot(127, 19, OLED_WHITE);
+    display.dot(127, 23, OLED_WHITE);
+    display.dot(127, 27, OLED_WHITE);
+    display.dot(127, 31, OLED_WHITE);
+    display.update(127, 19, 127, 31); // Update only the battery indicator area
+    break;
+  
+  default:
+    batteryIndicatorToggle = !batteryIndicatorToggle; // Toggle battery indicator
+    display.dot(127, 19, OLED_BLACK);
+    display.dot(127, 23, OLED_BLACK);
+    display.dot(127, 27, OLED_BLACK);
+    display.dot(127, 31, (batteryIndicatorToggle ? OLED_WHITE : OLED_BLACK));
+    display.update(127, 19, 127, 31); // Update only the battery indicator area
+    break;
+  }
 }
 
 // Animated splash screen implementation using frames stored in splashScreen.h

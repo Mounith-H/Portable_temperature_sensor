@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "charconv": "cpp"
+        "charconv": "cpp",
+        "numbers": "cpp",
+        "chrono": "cpp"
     }
 }

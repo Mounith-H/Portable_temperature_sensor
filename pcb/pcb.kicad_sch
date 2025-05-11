@@ -3008,6 +3008,12 @@
 		(color 0 0 0 0)
 		(uuid "054a3c8f-fc84-4b31-a8eb-6243e3376195")
 	)
+	(junction
+		(at 55.88 104.775)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "e5e5999d-61b8-453f-8b57-cb1d2de9964b")
+	)
 	(no_connect
 		(at 156.21 104.14)
 		(uuid "5ddfa6cb-f720-4f9d-b900-e253da0c386f")
@@ -3148,7 +3154,7 @@
 	)
 	(wire
 		(pts
-			(xy 55.88 104.775) (xy 58.42 104.775)
+			(xy 52.705 104.775) (xy 55.88 104.775)
 		)
 		(stroke
 			(width 0)
@@ -3165,6 +3171,16 @@
 			(type default)
 		)
 		(uuid "3caaa479-3d21-4758-91b1-c0a197cfef6a")
+	)
+	(wire
+		(pts
+			(xy 55.88 104.775) (xy 58.42 104.775)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3eff728d-0cc5-474b-a311-504f387fd923")
 	)
 	(wire
 		(pts
@@ -3468,6 +3484,16 @@
 	)
 	(wire
 		(pts
+			(xy 55.88 95.25) (xy 55.88 104.775)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bdc7683e-e317-47d1-a189-ba59b58319a9")
+	)
+	(wire
+		(pts
 			(xy 196.85 54.61) (xy 196.85 55.88)
 		)
 		(stroke
@@ -3495,6 +3521,16 @@
 			(type default)
 		)
 		(uuid "cf65c571-76b7-4180-8cab-e3660c94ab86")
+	)
+	(wire
+		(pts
+			(xy 55.88 83.185) (xy 55.88 85.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d0564248-e1d5-404d-a31c-b2d50a6ea728")
 	)
 	(wire
 		(pts
@@ -3717,7 +3753,7 @@
 		(uuid "9ec4eca6-4604-462e-be54-632a772a6043")
 	)
 	(label "GPIO0"
-		(at 55.88 104.775 180)
+		(at 52.705 104.775 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4084,6 +4120,95 @@
 		)
 	)
 	(symbol
+		(lib_id "PCM_Elektuur:R")
+		(at 55.88 90.17 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "1b90b17c-f99e-4105-85cb-e149d6891c05")
+		(property "Reference" "R1"
+			(at 58.42 88.8999 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "10k"
+			(at 58.42 91.4399 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
+			(at 55.88 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 55.88 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "resistor"
+			(at 55.88 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Indicator" "+"
+			(at 59.055 93.345 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Rating" "W"
+			(at 53.34 86.995 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "5d58ed9d-5939-40c4-864d-10c211a95647")
+		)
+		(pin "1"
+			(uuid "a5f5e736-644a-43f8-b972-feb7edbcd1c3")
+		)
+		(instances
+			(project "pcb"
+				(path "/32d2d8e4-ddd7-43e3-8a2d-1c60906095aa"
+					(reference "R1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "RF_Module:WEMOS_D1_mini")
 		(at 236.22 101.6 0)
 		(unit 1)
@@ -4369,7 +4494,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "2ef25f0b-3bc0-4ee5-b3f9-13ec1647dad0")
-		(property "Reference" "R5"
+		(property "Reference" "R2"
 			(at 74.93 111.1249 0)
 			(effects
 				(font
@@ -4442,7 +4567,7 @@
 		(instances
 			(project "pcb"
 				(path "/32d2d8e4-ddd7-43e3-8a2d-1c60906095aa"
-					(reference "R5")
+					(reference "R2")
 					(unit 1)
 				)
 			)
@@ -6742,6 +6867,71 @@
 			(project "pcb"
 				(path "/32d2d8e4-ddd7-43e3-8a2d-1c60906095aa"
 					(reference "C5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3.3V")
+		(at 55.88 83.185 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "f43cb512-7946-4dfe-bf80-a740d683b68e")
+		(property "Reference" "#PWR028"
+			(at 55.88 86.995 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+3.3V"
+			(at 60.325 81.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 55.88 83.185 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 55.88 83.185 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
+			(at 55.88 83.185 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "7557bbb8-d1d1-4ceb-8a25-c165dd47cf9a")
+		)
+		(instances
+			(project "pcb"
+				(path "/32d2d8e4-ddd7-43e3-8a2d-1c60906095aa"
+					(reference "#PWR028")
 					(unit 1)
 				)
 			)
